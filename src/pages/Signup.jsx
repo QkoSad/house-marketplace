@@ -49,7 +49,8 @@ function Signup() {
 
       navigate("/");
     } catch (error) {
-      toast.error("something went wron with the registration")
+      console.log(error)
+      toast.error("something went wrong with the registration")
     }
   };
   return (
