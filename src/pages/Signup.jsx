@@ -1,3 +1,5 @@
+ import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
@@ -47,7 +49,7 @@ function Signup() {
 
       navigate("/");
     } catch (error) {
-      console.log(error);
+      toast.error("something went wron with the registration")
     }
   };
   return (
