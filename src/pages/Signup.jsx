@@ -1,5 +1,5 @@
- import 'react-toastify/dist/ReactToastify.css';
-import { toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
@@ -10,7 +10,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { db } from "../firebase.config";
-import { setDoc,doc, serverTimestamp } from "firebase/firestore";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
+import OAuth from "../components/OAuth";
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,12 +46,12 @@ function Signup() {
       delete fromDataCopy.password;
       fromDataCopy.timestamp = serverTimestamp();
 
-      await setDoc(doc(db,'users',user.uid), fromDataCopy)
+      await setDoc(doc(db, "users", user.uid), fromDataCopy);
 
       navigate("/");
     } catch (error) {
-      console.log(error)
-      toast.error("something went wrong with the registration")
+      console.log(error);
+      toast.error("something went wrong with the registration");
     }
   };
   return (
@@ -101,6 +102,7 @@ function Signup() {
             </button>
           </div>
         </form>
+        <OAuth />
         <Link to="/sign-in" className="registerLink">
           Sign In Instead
         </Link>
