@@ -9,6 +9,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Offers from "./pages/Offers";
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
+import Category from "./pages/Category";
+import CreateLising from "./pages/CreateListing";
 
 function App() {
   return (
@@ -17,12 +19,15 @@ function App() {
         <Routes>
           <Route path="/" element={<Explore />} />
           <Route path="/offers" element={<Offers />} />
+          <Route path="/category/:categoryName" element={<Category />} />
+
           <Route path="/profile" element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="/sign-in" element={<Signin />} />
           <Route path="/sign-up" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/create-listing" element={<CreateLising />} />
         </Routes>
         <Navbar />
       </Router>

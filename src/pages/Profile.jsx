@@ -1,3 +1,5 @@
+import arrowRight from '../assets/svg/keyboardArrowRightIcon.svg'
+import homeIcon from '../assets/svg/homeIcon.svg'
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
@@ -82,6 +84,11 @@ function Profile() {
             />
           </form>
         </div>
+        <Link to='/create-listing' className='createListing'>
+          <img src={homeIcon} alt='home'/>
+          <p>Sell or rent your home</p>
+          <img src={arrowRight} alt='arrowRight'/>
+        </Link>
       </main>
     </div>
   );
