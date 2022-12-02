@@ -1,10 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { db } from "../firebase.config";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import { toast } from "react-toastify";
 
 function CreateLising() {
-  const [geolocationEnabled, setGeolocationEnabled] = useState(true);
+  const [geolocationEnabled, setGeolocationEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     type: "rent",
@@ -56,8 +66,96 @@ function CreateLising() {
     };
   }, [isMounted]);
 
-  const onSubmit = (e) => {
-    e.prevent.default();
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(false);
+
+    if (discountedPrice >= regularPrice) {
+      setLoading(false);
+      toast.error("Discounted price needs to be less than regular price");
+      return;
+    }
+    if (images.length > 6) {
+      setLoading(false);
+      toast.error("Max 6 images");
+      return;
+    }
+    let geolocation = {};
+    let location;
+
+    if (geolocationEnabled) {
+      //Don't want to register for a geolocation
+      /*      const response = await fetch(
+        `http://api.positionstack.com/v1/forward?access_key=${APIKEY}&query=${address}`
+      );
+      const data = await response.json();
+      setFormData((prevState) => ({
+        ...prevState,
+        latitude: data.data[0].latitude,
+        longitude: data.data[0].longitude,
+      }));
+      */
+    } else {
+      geolocation.lat = latittude;
+      geolocation.lng = longitude;
+      location = address;
+    }
+    const storeImage = async (image) => {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage();
+        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+        const storageRef = ref(storage, "images/" + fileName);
+        const uploadTask = uploadBytesResumable(storageRef, image);
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
+            switch (snapshot.state) {
+              case "paused":
+                console.log("Upload is paused");
+                break;
+              case "running":
+                console.log("Upload is running");
+                break;
+            }
+          },
+          (error) => {
+            reject(error);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL);
+            });
+          }
+        );
+      });
+    };
+    const imgUrls = await Promise.all(
+      [...images].map((image) => storeImage(image))
+    ).catch(() => {
+      setLoading(false);
+      toast.error("Image is not uploaded");
+      return;
+    });
+
+    const formDataCopy = {
+      ...formData,
+      imgUrls,
+      geolocation,
+      timestamp: serverTimestamp(),
+    };
+    formDataCopy.location=address
+    delete formDataCopy.images;
+    delete formDataCopy.address;
+    location && (formDataCopy.location = location);
+    !formDataCopy.offer && delete formDataCopy.discountedPrice;
+
+    const docRef = await addDoc(collection(db, "listings"), formDataCopy);
+    setLoading(false);
+    toast.success("Listing saved");
+    navigate(`/category/${formDataCopy.type}/${docRef.id}`);
   };
 
   const onMutate = (e) => {
@@ -72,7 +170,7 @@ function CreateLising() {
     if (e.target.files) {
       setFormData((prevState) => ({
         ...prevState,
-        image: e.target.files,
+        images: e.target.files,
       }));
     }
     if (!e.target.files) {
@@ -114,7 +212,7 @@ function CreateLising() {
               Rent
             </button>
           </div>
-          <label className="formLabel">Sell / Rent</label>
+          <label className="formLabel">Name</label>
           <input
             className="formInputName"
             type="text"
@@ -204,6 +302,7 @@ function CreateLising() {
               No
             </button>
           </div>
+          <label className="formLabel">Address</label>
           <textarea
             className="formInputAddress"
             type="text"
@@ -238,12 +337,12 @@ function CreateLising() {
               </div>
             </div>
           )}
-          <label className='formLabel'>Offer</label>
-          <div className='formButtons'>
+          <label className="formLabel">Offer</label>
+          <div className="formButtons">
             <button
-              className={offer ? 'formButtonActive' : 'formButton'}
-              type='button'
-              id='offer'
+              className={offer ? "formButtonActive" : "formButton"}
+              type="button"
+              id="offer"
               value={true}
               onClick={onMutate}
             >
@@ -251,10 +350,10 @@ function CreateLising() {
             </button>
             <button
               className={
-                !offer && offer !== null ? 'formButtonActive' : 'formButton'
+                !offer && offer !== null ? "formButtonActive" : "formButton"
               }
-              type='button'
-              id='offer'
+              type="button"
+              id="offer"
               value={false}
               onClick={onMutate}
             >
@@ -292,14 +391,14 @@ function CreateLising() {
               />
             </>
           )}
-          <label className="formLabel">Discounted Price</label>
+          <label className="formLabel">Images</label>
           <p className="imagesInfo">
             The first image will be the cover (max 6).
           </p>
           <input
             className="formInputFile"
             type="file"
-            id="image"
+            id="images"
             onChange={onMutate}
             max="6"
             accept=".jpg,.png,.jpeg"
