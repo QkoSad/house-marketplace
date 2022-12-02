@@ -1,11 +1,11 @@
-import arrowRight from '../assets/svg/keyboardArrowRightIcon.svg'
-import homeIcon from '../assets/svg/homeIcon.svg'
+import arrowRight from "../assets/svg/keyboardArrowRightIcon.svg";
+import homeIcon from "../assets/svg/homeIcon.svg";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { db } from "../firebase.config";
-import { updateDoc ,doc } from "firebase/firestore";
+import { updateDoc, doc } from "firebase/firestore";
 
 function Profile() {
   const [changeDetails, setChangeDetails] = useState(false);
@@ -27,13 +27,13 @@ function Profile() {
         await updateProfile(auth.currentUser, {
           displayName: name,
         });
-        const userRef = doc(db,'users',auth.currentUser.uid)
-        await updateDoc(userRef,{
-          name
-        })
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+          name,
+        });
       }
     } catch (error) {
-      toast.error('could no update profile details')
+      toast.error("could no update profile details");
     }
   };
   const onChange = (e) => {
@@ -46,22 +46,21 @@ function Profile() {
     <div className="profile">
       <header className="profileHeader">
         <p className="pageHeader">My Profile</p>
-        <button type="button" className="logOut" onclick={onLogout}>
+        <button type="button" className="logOut" onClick={onLogout}>
           Logout
         </button>
       </header>
       <main>
         <div className="profileDetailsHeader">
-          <p className="profileDetailsText">
-            <p
-              className="changePersonalDetails"
-              onClick={() => {
-                changeDetails && onSubmit();
-                setChangeDetails((prevState) => !prevState);
-              }}
-            >
-              {changeDetails ? "done" : "change"}
-            </p>
+          <p className="profileDetailsText">Personal Details</p>
+          <p
+            className="changePersonalDetails"
+            onClick={() => {
+              changeDetails && onSubmit();
+              setChangeDetails((prevState) => !prevState);
+            }}
+          >
+            {changeDetails ? "done" : "change"}
           </p>
         </div>
         <div className="profileCard">
@@ -84,10 +83,10 @@ function Profile() {
             />
           </form>
         </div>
-        <Link to='/create-listing' className='createListing'>
-          <img src={homeIcon} alt='home'/>
+        <Link to="/create-listing" className="createListing">
+          <img src={homeIcon} alt="home" />
           <p>Sell or rent your home</p>
-          <img src={arrowRight} alt='arrowRight'/>
+          <img src={arrowRight} alt="arrowRight" />
         </Link>
       </main>
     </div>
