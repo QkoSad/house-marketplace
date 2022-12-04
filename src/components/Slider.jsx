@@ -35,7 +35,7 @@ function Slider() {
     fetchListings();
   }, []);
   if (loading) return <Spinner />;
-  console.log(listings[0].data.imgUrls);
+  if (listings.length === 0) return <></>
   return (
     listings && (
       <>
